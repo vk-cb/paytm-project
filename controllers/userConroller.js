@@ -64,20 +64,27 @@ exports.userSignin = async(req, res)=>{
     }
 }
 
-exports.transferMoney = async (req, resp)=>{
-    try {
+// exports.transferMoney = async (req, resp)=>{
+//     try {
+
         
+//     } catch (error) {
         
-    } catch (error) {
-        
-    }
-}
+//     }
+// }
 
 exports.addInWallet = async (req, resp)=>{
     try {
+        const amount = req.body;
+        if(amount<0){
+            resp.status(401).json({msg : "Please enter valid amount"})
+        }
+        const totalAmount = amount+users.wallet;
+        const newUser = {...users, wallet: totalAmount}
+        await newUser.save()
         
     } catch (error) {
-        
+        res.status(500).json({msg : "Server error"})    
     }
 }
 
