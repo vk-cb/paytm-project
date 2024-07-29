@@ -64,27 +64,48 @@ exports.userSignin = async(req, res)=>{
     }
 }
 
-// exports.transferMoney = async (req, resp)=>{
-//     try {
 
-        
-//     } catch (error) {
-        
-//     }
-// }
 
 exports.addInWallet = async (req, resp)=>{
     try {
-        const amount = req.body;
-        if(amount<0){
+        const {amount} = req.body;
+        if(amount<=0){
             resp.status(401).json({msg : "Please enter valid amount"})
         }
-        const totalAmount = amount+users.wallet;
-        const newUser = {...users, wallet: totalAmount}
-        await newUser.save()
-        
+        const user = req.user;
+        user.wallet +=amount;
+        await user.save()
+        resp.status(200).json({ msg: "Amount added successfully", wallet: user.wallet });
     } catch (error) {
-        res.status(500).json({msg : "Server error"})    
+        resp.status(500).json({msg : "Server error"})    
     }
 }
 
+exports.transferMoney = async (req, resp)=>{
+    try {
+        const {recipientId, amount} = req.body;
+        if(amount<=0){
+            return resp.status(400).json({ msg: "Please enter a valid amount" });
+        }
+        const sender = req.user;
+        if(sender.wallet <amount){
+            return resp.status(400).json({ msg: "Insufficient balance" });
+        }
+
+        const recipient = await users.findById(recipientId)
+        
+        if(!recipient){
+            return resp.status(404).json({ msg: "Recipient not found" });
+        }
+
+        sender.wallet -=amount;
+        recipient.wallet +=amount;
+        await sender.save();
+        await recipient.save();
+
+        resp.status(200).json({ msg: "Transfer successful", senderWallet: sender.wallet, recipientWallet: recipient.wallet });
+    } catch (error) {
+        console.error(error);
+        resp.status(500).json({ msg: "Server error" });
+    }
+}
