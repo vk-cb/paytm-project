@@ -84,6 +84,10 @@ exports.addInWallet = async (req, resp)=>{
 exports.transferMoney = async (req, resp)=>{
     try {
         const {recipientId, amount} = req.body;
+        console.log(recipientId, req.user._id.toString())
+        if(recipientId === req.user._id.toString()){
+            return resp.status(400).json({msg : "You can't transfer money in own account"})
+        }
         if(amount<=0){
             return resp.status(400).json({ msg: "Please enter a valid amount" });
         }
