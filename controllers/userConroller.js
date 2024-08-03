@@ -101,7 +101,6 @@ exports.userSignin = async (req, res) => {
 
 exports.getProfile = async (req, resp)=>{
 
-    console.log(req.user, "sdfsdfsdf    ")
     try {
         const user = await users.findById({_id:req.user.id});
         if(!user){
@@ -121,7 +120,7 @@ exports.getProfile = async (req, resp)=>{
 
 
 exports.getUserById = async (req, resp)=>{
-    console.log(req.params.id)
+    
     try {
         const user = await users.findById(req.params.id);
         if(!user){
@@ -133,6 +132,19 @@ exports.getUserById = async (req, resp)=>{
             email: user.email,
             wallet: user.wallet
         } });
+    } catch (error) {
+        console.log(error)
+        resp.status(500).json({msg : "Server error"})
+    }
+}
+exports.getAllUsers = async (req, resp)=>{
+    
+    try {
+        const Users = await users.find();
+        if(!Users){
+            return resp.status(404).json({msg : "User not found"})
+        }
+        resp.status(200).json({ msg: "User data", data: Users });
     } catch (error) {
         console.log(error)
         resp.status(500).json({msg : "Server error"})
