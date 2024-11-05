@@ -1,11 +1,12 @@
 const express = require('express')
 const app = express()
+const cors = require('cors')
 require('dotenv').config()
 const mongoose = require('mongoose')
 const port = process.env.PORT
 const userRouter = require('./routes/userRoutes')
 app.use(express.json())
- 
+app.use(cors())
 // databse connection
 const dbUrl = process.env.MONGO_URL
 

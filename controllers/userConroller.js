@@ -33,37 +33,123 @@ exports.userSignup = async(req, res)=>{
     }
 }
 
-exports.userSignin = async(req, res)=>{
-    try {
-        const {email, password} = req.body;
+// exports.userSignin = async(req, res)=>{
+//     try {
+//         const {email, password} = req.body;
        
-        const findUser = await users.findOne({email})
-        if(!findUser){
-            res.status(400).json({msg : "please use valid email"})
-        }
+//         const findUser = await users.findOne({email})
+//         if(!findUser){
+//             res.status(400).json({msg : "please use valid email"})
+//         }
        
-        const matchPassword = await bcrypt.compare(password,findUser.password)
+//         const matchPassword = await bcrypt.compare(password,findUser.password)
 
-        if(!matchPassword){
-            res.status(400).json({msg : "please enter correct password"})
-        }
+//         if(!matchPassword){
+//             res.status(400).json({msg : "please enter correct password"})
+//         }
 
-        const payload = {
-            id : findUser._id,
-            email : findUser.email,
-            name : findUser.name,
-            wallet : findUser.wallet
-        }
+//         const payload = {
+//             id : findUser._id,
+//             email : findUser.email,
+//             name : findUser.name,
+//             wallet : findUser.wallet
+//         }
         
 
-        const token = jwt.sign(payload, secret, {expiresIn: '1h'})
-        // console.log("token", token)
-        res.status(200).json({msg : "user logedin successfully",data : payload, token})
+//         const token =  jwt.sign(payload, secret, {expiresIn: '1h'})
+//         // console.log("token", token)
+//         res.status(200).json({msg : "user logedin successfully",data : payload, token})
+//     } catch (error) {
+//         console.log(error)
+//         res.status(500).json({msg : "Server error"})
+//     }
+// }
+exports.userSignin = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Check if the user exists
+        const findUser = await users.findOne({ email });
+        if (!findUser) {
+            return res.status(400).json({ msg: "Please use a valid email" }); // Use return to prevent further execution
+        }
+
+        // Compare passwords
+        const matchPassword = await bcrypt.compare(password, findUser.password);
+        if (!matchPassword) {
+            return res.status(400).json({ msg: "Please enter the correct password" }); // Use return to prevent further execution
+        }
+
+        // Create JWT payload and token
+        const payload = {
+            id: findUser._id,
+            email: findUser.email,
+            name: findUser.name,
+            wallet: findUser.wallet
+        };
+
+        const token = jwt.sign(payload, secret, { expiresIn: '1h' });
+
+        // Send success response
+        return res.status(200).json({ msg: "User logged in successfully", data: payload, token });
+
     } catch (error) {
-        res.status(500).json({msg : "Server error"})
+        console.log(error);
+        return res.status(500).json({ msg: "Server error" }); // Use return to prevent further execution
+    }
+};
+
+exports.getProfile = async (req, resp)=>{
+
+    try {
+        const user = await users.findById({_id:req.user.id});
+        if(!user){
+            return resp.status(404).json({msg : "User not found"})
+        }
+        resp.status(200).json({ msg: "User data", data: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            wallet: user.wallet
+        } });
+    } catch (error) {
+        console.log(error)
+        resp.status(500).json({msg : "Server error"})
     }
 }
 
+
+exports.getUserById = async (req, resp)=>{
+    
+    try {
+        const user = await users.findById(req.params.id);
+        if(!user){
+            return resp.status(404).json({msg : "User not found"})
+        }
+        resp.status(200).json({ msg: "User data", data: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            wallet: user.wallet
+        } });
+    } catch (error) {
+        console.log(error)
+        resp.status(500).json({msg : "Server error"})
+    }
+}
+exports.getAllUsers = async (req, resp)=>{
+    
+    try {
+        const Users = await users.find();
+        if(!Users){
+            return resp.status(404).json({msg : "User not found"})
+        }
+        resp.status(200).json({ msg: "User data", data: Users });
+    } catch (error) {
+        console.log(error)
+        resp.status(500).json({msg : "Server error"})
+    }
+}
 
 
 exports.addInWallet = async (req, resp)=>{
