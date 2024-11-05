@@ -23,8 +23,8 @@ exports.userSignup = async(req, res)=>{
         const payload = { id: newUser._id, name: newUser.name, email: newUser.email, wallet: newUser.wallet };
 
         
-        console.log('Payload:', payload);
-        console.log('Token:', token);
+        // console.log('Payload:', payload);
+        // console.log('Token:', token);
 
         
         res.status(200).json({ msg: "User created successfully", data: payload, token });
